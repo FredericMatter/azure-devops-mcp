@@ -12,13 +12,14 @@ import { configureAllTools } from "./tools.js";
 import { userAgent } from "./utils.js";
 import { packageVersion } from "./version.js";
 const args = process.argv.slice(2);
-if (args.length === 0) {  console.error(
-    "Usage: mcp-server-azuredevops <organization_name>"
+if (args.length != 2) {  console.error(
+    "Usage: mcp-server-azuredevops <organization_name> <pat|azurecli>"
   );
   process.exit(1);
 }
 
 export const orgName = args[0];
+const authMethod = args[1];
 const orgUrl = "https://dev.azure.com/" + orgName;
 
 async function getAzureDevOpsToken(): Promise<AccessToken> {
@@ -28,15 +29,35 @@ async function getAzureDevOpsToken(): Promise<AccessToken> {
   return token;
 }
 
+async function getPersonalAccessToken(): Promise<string> {
+    const pat = process.env.AZURE_DEVOPS_EXT_PAT;
+    if (!pat) {
+        throw new Error(
+            "Personal Access Token (PAT) is not set. Please set the AZURE_DEVOPS_EXT_PAT environment variable.");
+    }
+    return pat;
+}
+
+async function getAzureDevOpsAuthHandler() {
+  switch (authMethod) {
+    case "pat":
+      const pat = await getPersonalAccessToken();
+      return azdev.getPersonalAccessTokenHandler(pat);
+    case "azurecli":
+      const token = await getAzureDevOpsToken();
+      return azdev.getBearerHandler(token.token);
+    default:
+      throw new Error("Invalid authentication method. Use 'pat' or 'azurecli'.");
+  }
+}
+
 async function getAzureDevOpsClient() : Promise<azdev.WebApi> {
-  const token = await getAzureDevOpsToken();
-  const authHandler = azdev.getBearerHandler(token.token);
-  const connection = new azdev.WebApi(orgUrl, authHandler, undefined, {
+  const authHandler = await getAzureDevOpsAuthHandler();
+  return new azdev.WebApi(orgUrl, authHandler, undefined, {
     productName: "AzureDevOps.MCP",
     productVersion: packageVersion,
     userAgent: userAgent
   });
-  return connection;
 }
 
 async function main() {
