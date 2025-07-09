@@ -19,6 +19,36 @@ The created PAT needs to be provided via environment variable `AZURE_DEVOPS_EXT_
 export AZURE_DEVOPS_EXT_PAT=<your_personal_access_token>
 ```
 
+Also, two Dockerfiles are provided for building the MCP server as a Docker image:
+- `Dockerfile` for the using PAT-based authentication
+- `Dockerfile-with-az-cli` for using Azure CLI-based authentication
+
+Build the images with:
+```bash
+docker build -t azure-devops-mcp-server-pat:latest .
+docker build -t azure-devops-mcp-server-az-cli:latest -f Dockerfile-with-az-cli .
+```
+These images can be used as mcp server by
+```json
+{
+   "servers": {
+      "ado": {
+         "type": "stdio",
+         "command": "docker",
+         "args": [
+            "run",
+            "-i",
+            "--rm",
+            "-e",
+            "AZURE_DEVOPS_EXT_PAT=2IbQEFmeFpOQVg80ZVkm2kWaTwQDC4WpgrBBiSJCTFxEUkcV5ZaDJQQJ99BGACAAAAAAAAAAAAASAZDO2iC0",
+            "azure-devops-mcp:0.0.1-alpha6"
+         ]
+      }
+   }
+}
+```
+
+
 For more details, see the original README of [microsoft/azure-devops-mcp](https://github.com/microsoft/azure-devops-mcp) below.
 
 ---
