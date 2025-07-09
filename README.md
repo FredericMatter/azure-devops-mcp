@@ -1,3 +1,27 @@
+# Fork of official [Microsoft Azure DevOps MCP Server repository](https://github.com/microsoft/azure-devops-mcp)
+Includes authentication using Personal Access Tokens (PAT), without the need for Azure CLI login.
+
+Usage:
+```bash
+npm install
+npm run <organization> <pat|azurecli>
+```
+- `organization`: Your Azure DevOps organization name (e.g., `my-awesome-organization`)
+- `pat|azurecli`: Choose between using a Personal Access Token (PAT) or Azure CLI for authentication.
+
+Note: For PAT-authentication, create a PAT in Azure DevOps with at least the following scopes
+- **Work Items (read & write)**
+- **Code (read & write)**
+- **Project and Team (read)**
+
+The created PAT needs to be provided via environment variable `AZURE_DEVOPS_EXT_PAT`:
+```bash
+export AZURE_DEVOPS_EXT_PAT=<your_personal_access_token>
+```
+
+For more details, see the original README of [microsoft/azure-devops-mcp](https://github.com/microsoft/azure-devops-mcp) below.
+
+---
 # ⭐ Azure DevOps MCP Server
 
 Easily install the Azure DevOps MCP Server for VS Code or VS Code Insiders:
